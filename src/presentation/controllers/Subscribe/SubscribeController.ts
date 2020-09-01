@@ -1,5 +1,5 @@
-export default class SubscribeController {
-  handle(httpRequest: any): any {
+export class SubscribeController {
+  handle (httpRequest: any): any {
     return {
       statusCode: 400
     }
