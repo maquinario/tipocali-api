@@ -11,6 +11,12 @@ interface SutTypes {
   addSubscriberStub: AddSubscriber
 }
 
+const fakeSubscriber = {
+  id: faker.random.uuid(),
+  name: `${faker.name.firstName()} ${faker.name.lastName()}`,
+  email: faker.internet.email()
+}
+
 const makeFakeRequest = (): HttpRequest => ({
   body: {
     name: `${faker.name.firstName()} ${faker.name.lastName()}`,
@@ -30,12 +36,7 @@ const makeEmailValidator = (): EmailValidator => {
 const makeAddSubscriber = (): AddSubscriber => {
   class AddSubscriberStub implements AddSubscriber {
     add (subscriber: AddSubscriberModel): SubscriberModel {
-      const fakerSubscriber = {
-        id: faker.random.uuid(),
-        name: `${faker.name.firstName()} ${faker.name.lastName()}`,
-        email: faker.internet.email()
-      }
-      return fakerSubscriber
+      return fakeSubscriber
     }
   }
   return new AddSubscriberStub()
@@ -120,5 +121,18 @@ describe('Subscribe Controller', () => {
     const httpRequest = makeFakeRequest()
     sut.handle(httpRequest)
     expect(addSpy).toHaveBeenCalledWith(httpRequest.body)
+  })
+
+  test('Should return 200 if valid data is provided', () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      body: {
+        name: fakeSubscriber.name,
+        email: fakeSubscriber.email
+      }
+    }
+    const httpResponse = sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body).toEqual(fakeSubscriber)
   })
 })
