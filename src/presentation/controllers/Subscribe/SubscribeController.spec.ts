@@ -1,10 +1,8 @@
 import faker from 'faker'
 import { SubscribeController } from './SubscribeController'
-import { MissingParamError } from '../../errors/MissingParamError'
-import { InvalidParamError } from '../../errors/InvalidParamError'
+import { MissingParamError, InvalidParamError, ServerError } from '../../errors'
 import { EmailValidator } from '../../protocols/EmailValidator'
 import { HttpRequest } from '../../protocols/Http'
-import { ServerError } from '../../errors/ServerError'
 
 interface SutTypes {
   sut: SubscribeController
