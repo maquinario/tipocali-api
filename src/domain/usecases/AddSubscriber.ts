@@ -6,5 +6,5 @@ export interface AddSubscriberModel {
 }
 
 export default interface AddSubscriber {
-  add: (subscriber: AddSubscriberModel) => SubscriberModel
+  add: (subscriber: AddSubscriberModel) => Promise<SubscriberModel>
 }

@@ -9,7 +9,7 @@ export class SubscribeController implements Controller {
     private readonly addSubscriber: AddSubscriber
   ) {}
 
-  handle (httpRequest: HttpRequest): HttpResponse {
+  async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
       const { name, email } = httpRequest.body
       const requiredFields = ['name', 'email']
@@ -22,7 +22,7 @@ export class SubscribeController implements Controller {
       if (!isValid) {
         return badRequest(new InvalidParamError('email'))
       }
-      const subscriber = this.addSubscriber.add({ name, email })
+      const subscriber = await this.addSubscriber.add({ name, email })
       return ok(subscriber)
     } catch (error) {
       return serverError()
