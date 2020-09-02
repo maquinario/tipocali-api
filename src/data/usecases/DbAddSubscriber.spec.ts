@@ -39,4 +39,21 @@ describe('DbAddSubscriber Usecase', () => {
     await sut.add({ name, email })
     expect(addSpy).toHaveBeenCalledWith({ name, email })
   })
+
+  test('Should throw if AddSubscriberRepository throws', async () => {
+    const { sut, addSubscriberRepositoryStub } = makeSut()
+    jest.spyOn(addSubscriberRepositoryStub, 'add').mockReturnValueOnce(
+      new Promise((resolve, reject) => reject(new Error()))
+    )
+    const { name, email } = subscriber
+    const promise = sut.add({ name, email })
+    await expect(promise).rejects.toThrow()
+  })
+
+  test('Should return a Subscriber on success', async () => {
+    const { sut } = makeSut()
+    const { name, email } = subscriber
+    const result = await sut.add({ name, email })
+    expect(result).toEqual(subscriber)
+  })
 })
