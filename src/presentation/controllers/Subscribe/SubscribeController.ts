@@ -22,7 +22,11 @@ export class SubscribeController implements Controller {
       if (!isValid) {
         return badRequest(new InvalidParamError('email'))
       }
-      this.addSubscriber.add({ name, email })
+      const subscriber = this.addSubscriber.add({ name, email })
+      return {
+        statusCode: 200,
+        body: subscriber
+      }
     } catch (error) {
       return serverError()
     }
