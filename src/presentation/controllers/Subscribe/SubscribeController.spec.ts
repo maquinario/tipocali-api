@@ -2,9 +2,13 @@ import faker from 'faker'
 import { SubscribeController } from './SubscribeController'
 import { MissingParamError } from '../../errors/MissingParamError'
 
+const makeSut = (): SubscribeController => {
+  return new SubscribeController()
+}
+
 describe('Subscribe Controller', () => {
   test('Should return 400 if no name is provided', () => {
-    const sut = new SubscribeController()
+    const sut = makeSut()
     const httpRequest = {
       body: {
         email: faker.internet.email()
@@ -16,7 +20,7 @@ describe('Subscribe Controller', () => {
   })
 
   test('Should return 400 if no email is provided', () => {
-    const sut = new SubscribeController()
+    const sut = makeSut()
     const httpRequest = {
       body: {
         name: faker.name.firstName()
