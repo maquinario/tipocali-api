@@ -4,6 +4,7 @@ import { MissingParamError } from '../../errors/MissingParamError'
 import { InvalidParamError } from '../../errors/InvalidParamError'
 import { EmailValidator } from '../../protocols/EmailValidator'
 import { HttpRequest } from '../../protocols/Http'
+import { ServerError } from '../../errors/ServerError'
 
 interface SutTypes {
   sut: SubscribeController
@@ -58,12 +59,7 @@ describe('Subscribe Controller', () => {
   test('Should return 400 if an invalid email is provided', () => {
     const { sut, emailValidatorStub } = makeSut()
     jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false)
-    const httpRequest = {
-      body: {
-        name: `${faker.name.firstName()} ${faker.name.lastName()}`,
-        email: faker.internet.email()
-      }
-    }
+    const httpRequest = makeFakeRequest()
     const httpResponse = sut.handle(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body).toEqual(new InvalidParamError('email'))
@@ -75,5 +71,19 @@ describe('Subscribe Controller', () => {
     const httpRequest = makeFakeRequest()
     sut.handle(httpRequest)
     expect(isValidSpy).toHaveBeenCalledWith(httpRequest.body.email)
+  })
+
+  test('Should return 500 if EmailValidator throws', () => {
+    class EmailValidatorStub implements EmailValidator {
+      isValid (email: string): boolean {
+        throw new Error()
+      }
+    }
+    const emailValidatorStub = new EmailValidatorStub()
+    const sut = new SubscribeController(emailValidatorStub)
+    const httpRequest = makeFakeRequest()
+    const httpResponse = sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
   })
 })
