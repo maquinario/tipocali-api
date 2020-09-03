@@ -8,7 +8,6 @@ export class SubscriberMongoRepository implements AddSubscriberRepository {
     const subscriberCollection = MongoHelper.getCollection('subscribers')
     const result = await subscriberCollection.insertOne(subscribeData)
     const subscriber = result.ops[0]
-    const { _id, ...subsciberWithoutId } = subscriber
-    return Object.assign({}, subsciberWithoutId, { id: _id })
+    return MongoHelper.map(subscriber)
   }
 }
