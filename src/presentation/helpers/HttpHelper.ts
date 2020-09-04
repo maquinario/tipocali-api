@@ -15,3 +15,8 @@ export const ok = (data: any): HttpResponse => ({
   statusCode: 200,
   body: data
 })
+
+export const mailerError = (errorName: string): HttpResponse => ({
+  statusCode: 400,
+  body: errorName
+})

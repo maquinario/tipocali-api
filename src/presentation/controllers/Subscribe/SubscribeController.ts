@@ -1,6 +1,6 @@
 import { HttpRequest, HttpResponse, Controller, EmailValidator } from '../../protocols'
 import { MissingParamError, InvalidParamError, ServerError } from '../../errors'
-import { badRequest, serverError, ok } from '../../helpers/HttpHelper'
+import { badRequest, serverError, ok, mailerError } from '../../helpers/HttpHelper'
 import AddSubscriber from '../../../domain/usecases/AddSubscriber'
 import AddToMailer from '../../../domain/usecases/AddToMailer'
 
@@ -25,9 +25,13 @@ export class SubscribeController implements Controller {
         return badRequest(new InvalidParamError('email'))
       }
       const subscriber = await this.addSubscriber.add({ name, email })
-      const mailerProvider = await this.addToMailer.add({ name, email })
-      if (!mailerProvider) {
-        return badRequest(new ServerError())
+      try {
+        const mailerProvider = await this.addToMailer.add({ name, email })
+        if (!mailerProvider) {
+          return badRequest(new ServerError())
+        }
+      } catch (error) {
+        return mailerError(`Could not subscribe to mailing: ${error.title as string}`)
       }
       return ok(subscriber)
     } catch (error) {
