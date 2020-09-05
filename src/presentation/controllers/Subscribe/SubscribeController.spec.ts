@@ -3,12 +3,14 @@ import { SubscribeController } from './SubscribeController'
 import { MissingParamError, InvalidParamError, ServerError } from '../../errors'
 import { EmailValidator, HttpRequest } from '../../protocols'
 import AddSubscriber, { AddSubscriberModel } from '../../../domain/usecases/AddSubscriber'
+import AddToMailer, { MailerResponse } from '../../../domain/usecases/AddToMailer'
 import SubscriberModel from '../../../domain/models/Subscriber'
 
 interface SutTypes {
   sut: SubscribeController
   emailValidatorStub: EmailValidator
   addSubscriberStub: AddSubscriber
+  addToMailerStub: AddToMailer
 }
 
 const fakeSubscriber = {
@@ -42,12 +44,22 @@ const makeAddSubscriber = (): AddSubscriber => {
   return new AddSubscriberStub()
 }
 
+const makeAddToMailer = (): AddToMailer => {
+  class AddToMailerStub implements AddToMailer {
+    async add (subscriberData: AddSubscriberModel): Promise<MailerResponse> {
+      return await new Promise(resolve => resolve({ status: true }))
+    }
+  }
+  return new AddToMailerStub()
+}
+
 const makeSut = (): SutTypes => {
   const addSubscriberStub = makeAddSubscriber()
   const emailValidatorStub = makeEmailValidator()
-  const sut = new SubscribeController(emailValidatorStub, addSubscriberStub)
+  const addToMailerStub = makeAddToMailer()
+  const sut = new SubscribeController(emailValidatorStub, addSubscriberStub, addToMailerStub)
   return {
-    sut, emailValidatorStub, addSubscriberStub
+    sut, emailValidatorStub, addSubscriberStub, addToMailerStub
   }
 }
 
@@ -118,6 +130,14 @@ describe('Subscribe Controller', () => {
   test('Should call AddSubscriber with correct values', async () => {
     const { sut, addSubscriberStub } = makeSut()
     const addSpy = jest.spyOn(addSubscriberStub, 'add')
+    const httpRequest = makeFakeRequest()
+    await sut.handle(httpRequest)
+    expect(addSpy).toHaveBeenCalledWith(httpRequest.body)
+  })
+
+  test('Should call AddToMailer with correct values', async () => {
+    const { sut, addToMailerStub } = makeSut()
+    const addSpy = jest.spyOn(addToMailerStub, 'add')
     const httpRequest = makeFakeRequest()
     await sut.handle(httpRequest)
     expect(addSpy).toHaveBeenCalledWith(httpRequest.body)
