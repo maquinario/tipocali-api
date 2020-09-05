@@ -143,6 +143,17 @@ describe('Subscribe Controller', () => {
     expect(addSpy).toHaveBeenCalledWith(httpRequest.body)
   })
 
+  test('Should return 500 if AddToMailer throws', async () => {
+    const { sut, addToMailerStub } = makeSut()
+    jest.spyOn(addToMailerStub, 'add').mockImplementationOnce(async () => {
+      return await new Promise((resolve, reject) => reject(new Error()))
+    })
+    const httpRequest = makeFakeRequest()
+    const httpResponse = await sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
+  })
+
   test('Should return 200 if valid data is provided', async () => {
     const { sut } = makeSut()
     const httpRequest = {
